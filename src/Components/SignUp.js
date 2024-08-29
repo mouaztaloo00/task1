@@ -15,6 +15,7 @@ import { useNavigate } from 'react-router-dom';
 
 const SignUp = () => {
 //console.log(process.env.REACT_APP_API_BASE_URL)
+const url = `${process.env.REACT_APP_API_BASE_URL}/users/signup`;
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -49,7 +50,7 @@ const SignUp = () => {
     const newUser = { username, email, password };
 
     try {
-      const response = await axios.post( process.env.REACT_APP_API_BASE_URL , newUser);
+      const response = await axios.post( url , newUser);
       console.log(response); 
       if (response.status === 200) {
           setSuccessMessage("Registration successful!");
