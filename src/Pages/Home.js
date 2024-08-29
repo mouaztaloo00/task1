@@ -122,7 +122,7 @@ export default function Home() {
         <div className="search-table-container">
             <h1>Search Page</h1>
             <div className="search-container">
-                <form onSubmit={handleSearchSubmit}>
+                <form className='form-home' onSubmit={handleSearchSubmit}>
                     <input
                         type="text"
                         placeholder="Search by username..."
