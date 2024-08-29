@@ -15,7 +15,7 @@ export default function Home() {
     const [editingUser, setEditingUser] = useState(null);
 
     useEffect(() => {
-        fetch('http://192.168.1.103:8080/users')
+        fetch('http://192.168.137.133:8080/users')
             .then(response => response.json())
             .then(data => {
                 setData(data);
@@ -28,7 +28,7 @@ export default function Home() {
 
     async function deleteUser(id) {
         try {
-            const res = await axios.delete(`http://192.168.1.103:8080/users/${id}`);
+            const res = await axios.delete(`http://192.168.137.133:8080/users/${id}`);
             if (res.status === 200) {
                 setRun((prev) => prev + 1);
             }
@@ -39,7 +39,7 @@ export default function Home() {
 
     async function updateUser() {
         try {
-            const res = await axios.put(`http://192.168.1.108:8080/users/${editingUser.id}`, editingUser);
+            const res = await axios.put(`http://192.168.137.133:8080/users/${editingUser.id}`, editingUser);
             if (res.status === 200) {
                 setRun((prev) => prev + 1);
                 setEditingUser(null); // اغلاق المودال بعد التحديث
@@ -122,7 +122,7 @@ export default function Home() {
         <div className="search-table-container">
             <h1>Search Page</h1>
             <div className="search-container">
-                <form onSubmit={handleSearchSubmit}>
+                <form className='form-home' onSubmit={handleSearchSubmit}>
                     <input
                         type="text"
                         placeholder="Search by username..."

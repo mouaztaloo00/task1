@@ -60,7 +60,7 @@ h1 {
     margin-bottom: 20px;
 }
 
-form {
+.form-home{
     display: flex;
     justify-content: center;
 }
