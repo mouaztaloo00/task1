@@ -35,7 +35,6 @@ const Login = () => {
       });
 
       if (response.data.length > 0) {
-        // Redirect to home
         history("/Home");
       } else {
         setError("Invalid Email or Password");

@@ -7,7 +7,7 @@ export default function Navbar(){
             </Link>
             <ul>
                 <li><Link to="/update">Update</Link></li>
-                <li><Link to="/delete">Delete</Link></li>
+                <li><Link to="/sign-up">logout</Link></li>
             </ul>
         </nav>
     )

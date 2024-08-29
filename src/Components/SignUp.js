@@ -1,4 +1,3 @@
-// src/RegistrationForm.js
 import React, { useState } from "react";
 import {
   TextField,
@@ -7,18 +6,22 @@ import {
   Box,
   Container,
   Avatar,
+  Snackbar,
+  Alert,
 } from "@mui/material";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import axios from "axios";
 import { useNavigate } from 'react-router-dom';
 
-
-const RegistrationForm = () => {
+const SignUp = () => {
+//console.log(process.env.REACT_APP_API_BASE_URL)
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
+  const [openSnackbar, setOpenSnackbar] = useState(false);
   const history = useNavigate();
 
   const validateForm = () => {
@@ -31,24 +34,45 @@ const RegistrationForm = () => {
     return "";
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
+
     e.preventDefault();
     const validationError = validateForm();
+
     if (validationError) {
       setError(validationError);
+      setSuccessMessage("");
+      setOpenSnackbar(true);
       return;
     }
 
-     const newUser = { username, email, password };
+    const newUser = { username, email, password };
 
-     try {
-      axios.post("http://localhost:3001/users", newUser);
-      history("/Home");
-      console.log (newUser)
+    try {
+      const response = await axios.post( process.env.REACT_APP_API_BASE_URL , newUser);
+      console.log(response); 
+      if (response.status === 200) {
+          setSuccessMessage("Registration successful!");
+          setError("");
+          setOpenSnackbar(true);
+          history("/Home");
+      } else {
+          console.error('Unexpected response:', response);
+          setError("Unexpected response from server.");
+          setOpenSnackbar(true);
+      }
     } catch (err) {
-      setError("Error in registration. Please try again.");
-      console.log (newUser)
+      console.error("Error during signup:", err);
+      setError(err.response?.data?.message || "Error in registration. Please try again.");
+      setSuccessMessage("");
+      setOpenSnackbar(true);
     }
+  };
+
+  const handleCloseSnackbar = () => {
+    setOpenSnackbar(false);
+    setError(""); 
+    setSuccessMessage("");
   };
 
   return (
@@ -67,11 +91,6 @@ const RegistrationForm = () => {
         <Typography component="h1" variant="h5">
           Sign Up
         </Typography>
-        {error && (
-          <Typography variant="body2" color="error" gutterBottom>
-            {error}
-          </Typography>
-        )}
         <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1 }}>
           <TextField
             margin="normal"
@@ -122,16 +141,21 @@ const RegistrationForm = () => {
             Sign Up
           </Button>
           <Button
-                onClick={() => history("/")}
-                variant="text"
-                color="primary"
-              >
-                I have an account go to Login
-           </Button>
+            onClick={() => history("/")}
+            variant="text"
+            color="primary"
+          >
+            I have an account go to Login
+          </Button>
         </Box>
       </Box>
+      <Snackbar open={openSnackbar} autoHideDuration={6000} onClose={handleCloseSnackbar}>
+        <Alert onClose={handleCloseSnackbar} severity={successMessage ? "success" : error ? "error" : "info"} sx={{ width: '100%' }}>
+          {successMessage || error}
+        </Alert>
+      </Snackbar>
     </Container>
   );
 };
 
-export default RegistrationForm;
+export default SignUp;
