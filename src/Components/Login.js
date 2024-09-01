@@ -14,6 +14,8 @@ import { useNavigate } from 'react-router-dom';
 import axios from "axios";
 
 const Login = () => {
+
+  const url = `${process.env.REACT_APP_API_BASE_URL}/users/login`;
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -30,11 +32,12 @@ const Login = () => {
     }
 
     try {
-      const response = await axios.get("http://localhost:3001/users", {
+      const response = await axios.get(url,{
         params: { email, password }
       });
 
       if (response.data.length > 0) {
+        localStorage.setItem('authToken', response.data.token);
         history("/Home");
       } else {
         setError("Invalid Email or Password");
@@ -89,7 +92,7 @@ const Login = () => {
           <Grid container>
             <Grid item>
               <Button
-                onClick={() => history("/Sign-Up")}
+                onClick={() => history("/")}
                 variant="text"
                 color="primary"
               >

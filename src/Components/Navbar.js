@@ -1,5 +1,13 @@
 import { Link } from "react-router-dom"
+import { useNavigate } from 'react-router-dom';
+
 export default function Navbar(){
+    const handleLogout = () => {
+        localStorage.removeItem("authToken");
+        history("/login");
+      };
+        const history = useNavigate();
+
     return(
         <nav className="nav">
             <Link to="/home" className="site-title">
@@ -7,7 +15,7 @@ export default function Navbar(){
             </Link>
             <ul>
                 <li><Link to="/update">Update</Link></li>
-                <li><Link to="/">logout</Link></li>
+                <li><Link to="/" onClick={handleLogout} >logout</Link></li>
             </ul>
         </nav>
     )

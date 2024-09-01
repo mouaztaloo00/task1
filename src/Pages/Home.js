@@ -178,7 +178,7 @@ export default function Home() {
                             bgcolor: 'background.paper',
                             boxShadow: 24,
                             p: 4,
-                            borderRadius: 2,  // تنسيق لتدوير حواف المودال
+                            borderRadius: 2,
                         }}
                     >
                         <h2>Edit User</h2>
