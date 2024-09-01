@@ -14,8 +14,9 @@ export default function Home() {
     const [search, setSearch] = useState(false);
     const [editingUser, setEditingUser] = useState(null);
     const url = `${process.env.REACT_APP_API_BASE_URL}/users`;
+
     useEffect(() => {
-        fetch( url )
+        fetch(url)
             .then(response => response.json())
             .then(data => {
                 setData(data);
@@ -24,7 +25,7 @@ export default function Home() {
             .catch(() => {
                 setLoading(false);
             });
-    }, [runUseEffect,url]);
+    }, [runUseEffect, url]);
 
     async function deleteUser(id) {
         try {
@@ -34,6 +35,18 @@ export default function Home() {
             }
         } catch {
             console.log("Deletion failed");
+        }
+    }
+
+    async function deleteUsersByDateRange() {
+        try {
+            const res = await axios.delete(`${url}/deleteByDateRange`, { data: { startDate, endDate } });
+            console.log(startDate) 
+            if (res.status === 200) {
+                setRun((prev) => prev + 1);
+            }
+        } catch {
+            console.log("Bulk deletion failed");
         }
     }
 
@@ -77,7 +90,7 @@ export default function Home() {
     let filteredData = data;
     if (search) {
         filteredData = data.filter(users => {
-            const formattedDate = users.registerDate?.split('T')[0]; // التأكد من تنسيق التاريخ ليكون YYYY-MM-DD فقط// التأكد من تنسيق التاريخ ليكون YYYY-MM-DD فقط
+            const formattedDate = users.registerDate?.split('T')[0]; // التأكد من تنسيق التاريخ ليكون YYYY-MM-DD فقط
             if (searchTerm) {
                 return users.username?.toLowerCase().includes(searchTerm.toLowerCase());
             } else if (searchDate) {
@@ -110,7 +123,7 @@ export default function Home() {
         {
             name: 'Action',
             cell: row => (
-                <div className=' buttonrow'>
+                <div className='buttonrow'>
                     <button onClick={() => openEditModal(row)}>Edit</button>
                     <button onClick={() => deleteUser(row.id)}>Delete</button>
                 </div>
@@ -153,6 +166,7 @@ export default function Home() {
                     />
                     <button type="submit" className="form-button">Search</button>
                 </form>
+                <button className="delete-button" onClick={deleteUsersByDateRange}>Delete Users by Date Range</button>
             </div>
 
             <DataTable
@@ -160,7 +174,6 @@ export default function Home() {
                 data={filteredData}
                 pagination
                 highlightOnHover
-                
             />
 
             {editingUser && (
@@ -198,7 +211,7 @@ export default function Home() {
                             onChange={(e) => setEditingUser({ ...editingUser, email: e.target.value })}
                             sx={{ mb: 2 }}
                         />
-                        {/* <TextField
+                        <TextField
                             label="Registration Date"
                             variant="outlined"
                             type="date"
@@ -207,7 +220,7 @@ export default function Home() {
                             onChange={(e) => setEditingUser({ ...editingUser, date: e.target.value })}
                             InputLabelProps={{ shrink: true }}
                             sx={{ mb: 2 }}
-                        /> */}
+                        />
                         <Button variant="contained" onClick={updateUser} color="primary">
                             Save
                         </Button>

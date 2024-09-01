@@ -1,5 +1,7 @@
 import Navbar from './Components/Navbar'
 import Home from './Pages/Home'
+import Hometest from './Pages/Hometest'
+
 import Update from './Pages/Update'
 import Delete from './Pages/Delete'
 import SignUp from './Components/SignUp'
@@ -15,6 +17,8 @@ function App() {
       <Route path='/' element={<Login/>}/>
       <Route path='/Sign-Up' element={<SignUp/>}/> 
       <Route path='/Home' element={<Home/>}/>
+      <Route path='/Hometest' element={<Hometest/>}/>
+
       <Route path='/update' element={<Update/>}/>
       <Route path='/delete' element={<Delete/>}/>
     </Routes>
