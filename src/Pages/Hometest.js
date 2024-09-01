@@ -3,7 +3,7 @@ import axios from "axios";
 import DataTable from 'react-data-table-component';
 import { Modal, Box, TextField, Button } from '@mui/material';
 
-export default function Home() {
+export default function Hometest() {
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(true);
     const [runUseEffect, setRun] = useState(0);
@@ -124,8 +124,8 @@ export default function Home() {
             name: 'Action',
             cell: row => (
                 <div className='buttonrow'>
-                    <button onClick={() => openEditModal(row)}>Edit</button>
-                    <button onClick={() => deleteUser(row.id)}>Delete</button>
+                    <button className='btn' onClick={() => openEditModal(row)}>Edit</button>
+                    <button className='btn' onClick={() => deleteUser(row.id)}>Delete</button>
                 </div>
             ),
         },
@@ -164,9 +164,9 @@ export default function Home() {
                         onChange={handleEndDate}
                         className="form-input"
                     />
-                    <button type="submit" className="form-button">Search</button>
+                    <button className='btn' type="submit" >Search</button>
                 </form>
-                <button className="delete-button" onClick={deleteUsersByDateRange}>Delete Users by Date Range</button>
+                <button className='btn' onClick={deleteUsersByDateRange}>Delete Users by Date Range</button>
             </div>
 
             <DataTable
