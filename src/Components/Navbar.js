@@ -14,7 +14,6 @@ export default function Navbar(){
                 Home
             </Link>
             <ul>
-                <li><Link to="/update">Update</Link></li>
                 <li><Link to="/" onClick={handleLogout} >logout</Link></li>
             </ul>
         </nav>

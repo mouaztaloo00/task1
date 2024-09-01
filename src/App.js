@@ -1,10 +1,8 @@
 import React from 'react';
 import Navbar from './Components/Navbar';
 import Home from './Pages/Home';
-import Update from './Pages/Update';
-import Delete from './Pages/Delete';
-import SignUp from './Components/SignUp';
-import Login from './Components/Login';
+import SignUp from './Pages/SignUp';
+import Login from './Pages/Login';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import ProtectedRoute from './Components/ProtectedRoute';
 
@@ -21,22 +19,6 @@ function App() {
             element={
               <ProtectedRoute>
                 <Home />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path='/update'
-            element={
-              <ProtectedRoute>
-                <Update />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path='/delete'
-            element={
-              <ProtectedRoute>
-                <Delete />
               </ProtectedRoute>
             }
           />
