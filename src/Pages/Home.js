@@ -13,9 +13,9 @@ export default function Home() {
     const [endDate, setEndDate] = useState('');
     const [search, setSearch] = useState(false);
     const [editingUser, setEditingUser] = useState(null);
-
+    const url = `${process.env.REACT_APP_API_BASE_URL}/users`;
     useEffect(() => {
-        fetch('http://192.168.137.133:8080/users')
+        fetch( url )
             .then(response => response.json())
             .then(data => {
                 setData(data);
@@ -24,11 +24,11 @@ export default function Home() {
             .catch(() => {
                 setLoading(false);
             });
-    }, [runUseEffect]);
+    }, [runUseEffect,url]);
 
     async function deleteUser(id) {
         try {
-            const res = await axios.delete(`http://192.168.137.133:8080/users/${id}`);
+            const res = await axios.delete(`${url}/${id}`);
             if (res.status === 200) {
                 setRun((prev) => prev + 1);
             }
@@ -39,7 +39,7 @@ export default function Home() {
 
     async function updateUser() {
         try {
-            const res = await axios.put(`http://192.168.137.133:8080/users/${editingUser.id}`, editingUser);
+            const res = await axios.put(`${url}/${editingUser.id}`, editingUser);
             if (res.status === 200) {
                 setRun((prev) => prev + 1);
                 setEditingUser(null); // اغلاق المودال بعد التحديث
