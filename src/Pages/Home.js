@@ -111,8 +111,8 @@ export default function Home() {
             name: 'Action',
             cell: row => (
                 <div className=' buttonrow'>
-                    <button onClick={() => openEditModal(row)}>Edit</button>
-                    <button onClick={() => deleteUser(row.id)}>Delete</button>
+                    <button className='btn' onClick={() => openEditModal(row)}>Edit</button>
+                    <button className='btn' onClick={() => deleteUser(row.id)}>Delete</button>
                 </div>
             ),
         },
@@ -151,7 +151,7 @@ export default function Home() {
                         onChange={handleEndDate}
                         className="form-input"
                     />
-                    <button type="submit" className="form-button">Search</button>
+                    <button type="submit" className="btn">Search</button>
                 </form>
             </div>
 
@@ -178,7 +178,7 @@ export default function Home() {
                             bgcolor: 'background.paper',
                             boxShadow: 24,
                             p: 4,
-                            borderRadius: 2,  // تنسيق لتدوير حواف المودال
+                            borderRadius: 2,
                         }}
                     >
                         <h2>Edit User</h2>

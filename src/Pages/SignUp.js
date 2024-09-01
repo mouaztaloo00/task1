@@ -53,6 +53,7 @@ const url = `${process.env.REACT_APP_API_BASE_URL}/users/signup`;
       const response = await axios.post( url , newUser);
       console.log(response); 
       if (response.status === 200) {
+          localStorage.setItem('authToken', response.data.token);
           setSuccessMessage("Registration successful!");
           setError("");
           setOpenSnackbar(true);
@@ -142,7 +143,7 @@ const url = `${process.env.REACT_APP_API_BASE_URL}/users/signup`;
             Sign Up
           </Button>
           <Button
-            onClick={() => history("/")}
+            onClick={() => history("/home")}
             variant="text"
             color="primary"
           >
