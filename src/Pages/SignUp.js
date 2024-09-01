@@ -143,7 +143,7 @@ const url = `${process.env.REACT_APP_API_BASE_URL}/users/signup`;
             Sign Up
           </Button>
           <Button
-            onClick={() => history("/home")}
+            onClick={() => history("/login")}
             variant="text"
             color="primary"
           >
