@@ -111,8 +111,8 @@ export default function Home() {
             name: 'Action',
             cell: row => (
                 <div className=' buttonrow'>
-                    <button onClick={() => openEditModal(row)}>Edit</button>
-                    <button onClick={() => deleteUser(row.id)}>Delete</button>
+                    <button className='btn' onClick={() => openEditModal(row)}>Edit</button>
+                    <button className='btn' onClick={() => deleteUser(row.id)}>Delete</button>
                 </div>
             ),
         },
@@ -151,7 +151,7 @@ export default function Home() {
                         onChange={handleEndDate}
                         className="form-input"
                     />
-                    <button type="submit" className="form-button">Search</button>
+                    <button type="submit" className="btn">Search</button>
                 </form>
             </div>
 

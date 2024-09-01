@@ -65,7 +65,7 @@ h1 {
     justify-content: center;
 }
 
-input[type="text"] {
+.form-input[type="text"] {
     padding: 10px;
     border: 1px solid #ddd;
     border-radius: 4px;
@@ -73,7 +73,7 @@ input[type="text"] {
     font-size: 16px;
 }
 
-button {
+.btn {
     padding: 5px 15px;
     border: none;
     border-radius: 15px;
@@ -84,7 +84,7 @@ button {
     margin-left: 10px;
 }
 
-button:hover {
+.btn:hover {
     background-color: #0056b3;
 }
 
