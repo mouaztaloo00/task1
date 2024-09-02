@@ -9,7 +9,7 @@ import {
   Box,
   Grid,
   Alert,
-  CircularProgress
+  CircularProgress,
 } from "@mui/material";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import { useNavigate } from "react-router-dom";
@@ -25,7 +25,7 @@ const Login = () => {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
-  const history = useNavigate();
+  const navigate = useNavigate();
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -33,7 +33,6 @@ const Login = () => {
     setSuccess("");
     setLoading(true);
 
-    // Basic validation
     if (!email || !password) {
       setError("Email and Password are required");
       setLoading(false);
@@ -41,19 +40,21 @@ const Login = () => {
     }
 
     try {
-      const response = await axios.get(url, {
-        params: { email, password }
+      const response = await axios.post(url, {
+        email,
+        password,
       });
 
-      if (response.data.length > 0) {
-        localStorage.setItem('authToken', response.data.token);
+      if (response.data.message === "Login Successful") {
+        localStorage.setItem('authToken', response.data.token || ''); 
         setSuccess("Login successful!");
-        setTimeout(() => history("/Home"), 2000); // Redirect after 2 seconds
+        setTimeout(() => navigate("/Home"), 2000); 
       } else {
-        setError("Invalid Email or Password");
+        setError(response.data.message || "Invalid Email or Password");
       }
     } catch (error) {
-      setError("Error occurred while logging in");
+      const errorMessage = error.response?.data?.message || "Error occurred while logging in";
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -70,8 +71,8 @@ const Login = () => {
           alignItems: "center",
         }}
       >
-        <Avatar sx={{ m: 1, bgcolor: "secondary.main" }}>
-          <LockOutlinedIcon />
+        <Avatar sx={{ m: 1.4, bgcolor: "secondary.main", width: 56, height: 56 }}>
+          <LockOutlinedIcon sx={{ fontSize: 32 }} />
         </Avatar>
         <Typography component="h1" variant="h5">
           Login
@@ -116,13 +117,17 @@ const Login = () => {
           <Grid container>
             <Grid item>
               <Button
-                onClick={() => history("/sign-up")}
+                onClick={() => navigate("/sign-up")}
                 variant="text"
                 color="primary"
               >
                 Don't have an account? Sign Up
               </Button>
-              {error && (
+            </Grid>
+          </Grid>
+        </form>
+
+        {error && (
           <Alert severity="error" sx={{ width: "100%", mt: 2 }}>
             {error}
           </Alert>
@@ -135,9 +140,6 @@ const Login = () => {
         {loading && (
           <CircularProgress sx={{ mt: 2 }} />
         )}
-            </Grid>
-          </Grid>
-        </form>
       </Box>
     </Container>
   );

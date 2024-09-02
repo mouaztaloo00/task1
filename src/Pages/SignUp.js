@@ -94,8 +94,8 @@ const url = `${process.env.REACT_APP_API_BASE_URL}/users/signup`;
           marginTop: 4,
         }}
       >
-        <Avatar sx={{ m: 1, bgcolor: "primary.main" }}>
-          <LockOutlinedIcon />
+        <Avatar sx={{ m: 1, bgcolor: "primary.main" , width: 56, height: 56  }}>
+          <LockOutlinedIcon sx={{ fontSize: 32 }} />
         </Avatar>
         <Typography component="h1" variant="h5">
           Sign Up
