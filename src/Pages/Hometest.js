@@ -7,28 +7,34 @@ export default function Hometest() {
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(true);
     const [runUseEffect, setRun] = useState(0);
-    const [searchTerm, setSearchTerm] = useState('');
-    const [searchDate, setSearchDate] = useState('');
+    const [username, setusername] = useState('');
+    const [registerDate, setregisterDate] = useState('');
     const [startDate, setStartDate] = useState('');
     const [endDate, setEndDate] = useState('');
-    const [search, setSearch] = useState(false);
+   // const [search, setSearch] = useState(false);
     const [editingUser, setEditingUser] = useState(null);
     const url = `${process.env.REACT_APP_API_BASE_URL}/users`;
 
     useEffect(() => {
-        fetch(url)
-            .then(response => response.json())
-            .then(data => {
-                setData(data);
-                setLoading(false);
-            })
-            .catch(() => {
-                setLoading(false);
-            });
-    }, [runUseEffect, url]);
+        fetchData();
+    }, [runUseEffect]);
+
+    const fetchData = async () => {
+        setLoading(true);
+        try {
+            console.log("Fetching data from API...");
+            const response = await axios.get(url);
+            setData(response.data);
+        } catch (error) {
+            console.log("Error fetching data", error);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     async function deleteUser(id) {
         try {
+            console.log(`Sending request to delete user with ID: ${id}`);
             const res = await axios.delete(`${url}/${id}`);
             if (res.status === 200) {
                 setRun((prev) => prev + 1);
@@ -40,8 +46,8 @@ export default function Hometest() {
 
     async function deleteUsersByDateRange() {
         try {
-            const res = await axios.delete(`${url}/deleteByDateRange`, { data: { startDate, endDate } });
-            console.log(startDate) 
+            console.log(`Sending request to delete users from ${startDate} to ${endDate}`);
+            const res = await axios.delete(`${url}/registered-between?startDate=${startDate}&endDate=${endDate}`);
             if (res.status === 200) {
                 setRun((prev) => prev + 1);
             }
@@ -52,10 +58,11 @@ export default function Hometest() {
 
     async function updateUser() {
         try {
+            console.log(`Sending request to update user with ID: ${editingUser.id}`);
             const res = await axios.put(`${url}/${editingUser.id}`, editingUser);
             if (res.status === 200) {
                 setRun((prev) => prev + 1);
-                setEditingUser(null); // اغلاق المودال بعد التحديث
+                setEditingUser(null); // إغلاق المودال بعد التحديث
             }
         } catch {
             console.log("Update failed");
@@ -63,11 +70,11 @@ export default function Hometest() {
     }
 
     const handleSearch = (e) => {
-        setSearchTerm(e.target.value);
+        setusername(e.target.value);
     };
 
-    const handleSearchDate = (e) => {
-        setSearchDate(e.target.value);
+    const handleregisterDate= (e) => {
+        setregisterDate(e.target.value);
     };
 
     const handleStartDate = (e) => {
@@ -78,29 +85,39 @@ export default function Hometest() {
         setEndDate(e.target.value);
     };
 
-    const handleSearchSubmit = (e) => {
+    const handleSearchSubmit = async (e) => {
         e.preventDefault();
-        setSearch(true);
+        try {
+            setLoading(true);
+            let response;
+
+            if (username) {
+                console.log(`Searching users by username: ${username}`);
+                response = await axios.get(`${url}/username/${username}`);
+            } else if (registerDate) {
+                console.log(`Searching users by registration date: ${registerDate}`);
+                response = await axios.get(`${url}/${registerDate}`);
+            } else if (startDate && endDate) {
+                response = await axios.get(`${url}/registered-between?startDate=${startDate}&endDate=${endDate}`);
+                console.log(`Searching users between dates ${response}`);
+
+                // http://localhost:8080/users/registered-between?startDate=01-01-2024&endDate=01-28-2024
+            } else {
+                console.log("Fetching all users");
+                response = await axios.get(url);
+            }
+
+            setData(response.data);
+        } catch (error) {
+            console.log("Search failed", error);
+        } finally {
+            setLoading(false);
+        }
     };
 
     const openEditModal = (user) => {
         setEditingUser(user);
     };
-
-    let filteredData = data;
-    if (search) {
-        filteredData = data.filter(users => {
-            const formattedDate = users.registerDate?.split('T')[0]; // التأكد من تنسيق التاريخ ليكون YYYY-MM-DD فقط
-            if (searchTerm) {
-                return users.username?.toLowerCase().includes(searchTerm.toLowerCase());
-            } else if (searchDate) {
-                return formattedDate === searchDate;
-            } else if (startDate && endDate) {
-                return formattedDate >= startDate && formattedDate <= endDate;
-            }
-            return true;
-        });
-    }
 
     if (loading) return <p>Loading...</p>;
 
@@ -130,7 +147,47 @@ export default function Hometest() {
             ),
         },
     ];
-
+    // const columns = [
+    //     {
+    //         name: 'Username',
+    //         selector: row => row.username || 'No Name Available',
+    //         sortable: true,
+    //     },
+    //     {
+    //         name: 'Email',
+    //         selector: row => row.email || 'No Email Available',
+    //         sortable: true,
+    //     },
+    //     {
+    //         name: 'Registration Date',
+    //         selector: row => {
+    //             // استخراج التاريخ بصيغة YYYY-MM-DD
+    //             const formattedDate = row.registerDate?.split('T')[0];
+    
+    //             // إذا كان التاريخ موجودًا، قم بتحويله إلى صيغة "DD-MM-YYYY" للعرض فقط
+    //             if (formattedDate) {
+    //                 // تقسيم التاريخ إلى سنة، شهر، يوم
+    //                 const [year, month, day] = formattedDate.split('-');
+                    
+    //                 // إعادة ترتيب التاريخ إلى صيغة "DD-MM-YYYY"
+    //                 return `${day}-${month}-${year}`;
+    //             } else {
+    //                 return 'No Date Available';
+    //             }
+    //         },
+    //         sortable: true,
+    //     },
+    //     {
+    //         name: 'Action',
+    //         cell: row => (
+    //             <div className='buttonrow'>
+    //                 <button className='btn' onClick={() => openEditModal(row)}>Edit</button>
+    //                 <button className='btn' onClick={() => deleteUser(row.id)}>Delete</button>
+    //             </div>
+    //         ),
+    //     },
+    // ];
+    
     return (
         <div className="search-table-container">
             <h1>Search Page</h1>
@@ -139,17 +196,20 @@ export default function Hometest() {
                     <input
                         type="text"
                         placeholder="Search by username..."
-                        value={searchTerm}
+                        value={username}
                         onChange={handleSearch}
                         className="form-input"
                     />
                     <input
                         type="date"
                         placeholder="Search by date..."
-                        value={searchDate}
-                        onChange={handleSearchDate}
+                        value={registerDate}
+                        onChange={handleregisterDate}
                         className="form-input"
                     />
+                    <button className='btn' type="submit">Search</button>
+                </form>
+                <form className='form-home' onSubmit={handleSearchSubmit}>
                     From <input
                         type="date"
                         placeholder="Start date..."
@@ -164,14 +224,14 @@ export default function Hometest() {
                         onChange={handleEndDate}
                         className="form-input"
                     />
-                    <button className='btn' type="submit" >Search</button>
+                    <button className='btn' type="submit">Search by Date Range</button>
+                    <button className='btn' onClick={deleteUsersByDateRange}>Delete Users by Date Range</button>
                 </form>
-                <button className='btn' onClick={deleteUsersByDateRange}>Delete Users by Date Range</button>
             </div>
 
             <DataTable
                 columns={columns}
-                data={filteredData}
+                data={data}
                 pagination
                 highlightOnHover
             />
@@ -211,16 +271,7 @@ export default function Hometest() {
                             onChange={(e) => setEditingUser({ ...editingUser, email: e.target.value })}
                             sx={{ mb: 2 }}
                         />
-                        <TextField
-                            label="Registration Date"
-                            variant="outlined"
-                            type="date"
-                            fullWidth
-                            value={editingUser.date?.split('T')[0]} // التأكد من تنسيق التاريخ ليكون YYYY-MM-DD
-                            onChange={(e) => setEditingUser({ ...editingUser, date: e.target.value })}
-                            InputLabelProps={{ shrink: true }}
-                            sx={{ mb: 2 }}
-                        />
+                   
                         <Button variant="contained" onClick={updateUser} color="primary">
                             Save
                         </Button>
