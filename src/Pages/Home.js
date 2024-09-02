@@ -1,18 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import axios from "axios";
 import DataTable from 'react-data-table-component';
-import { Modal, Box, TextField, Button , LinearProgress} from '@mui/material';
+import { Modal, Box, TextField, Button, LinearProgress, Alert } from '@mui/material';
 
 export default function Home() {
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(true);
     const [runUseEffect, setRun] = useState(0);
-    const [username, setusername] = useState('');
-    const [registerDate, setregisterDate] = useState('');
+    const [username, setUsername] = useState('');
+    const [registerDate, setRegisterDate] = useState('');
     const [startDate, setStartDate] = useState('');
     const [endDate, setEndDate] = useState('');
-   // const [search, setSearch] = useState(false);
     const [editingUser, setEditingUser] = useState(null);
+    const [successMessage, setSuccessMessage] = useState('');
+    const [errorMessage, setErrorMessage] = useState('');
     const url = `${process.env.REACT_APP_API_BASE_URL}/users`;
 
     useEffect(() => {
@@ -26,7 +27,8 @@ export default function Home() {
             const response = await axios.get(url);
             setData(response.data);
         } catch (error) {
-            console.log("Error fetching data", error);
+            console.error("Error fetching data", error);
+            setErrorMessage('Failed to fetch data.');
         } finally {
             setLoading(false);
         }
@@ -38,9 +40,17 @@ export default function Home() {
             const res = await axios.delete(`${url}/${id}`);
             if (res.status === 200) {
                 setRun((prev) => prev + 1);
+                setSuccessMessage('User deleted successfully.');
+                setErrorMessage('');
             }
-        } catch {
-            console.log("Deletion failed");
+        } catch (error) {
+            console.error("Deletion failed", error);
+            if (error.response && error.response.data && error.response.data.message) {
+                setErrorMessage(error.response.data.message);
+            } else {
+                setErrorMessage('Failed to delete user.');
+            }
+            setSuccessMessage('');
         }
     }
 
@@ -50,31 +60,51 @@ export default function Home() {
             const res = await axios.delete(`${url}/registered-between?startDate=${startDate}&endDate=${endDate}`);
             if (res.status === 200) {
                 setRun((prev) => prev + 1);
+                setSuccessMessage('Users deleted successfully within the date range.');
+                setErrorMessage('');
             }
-        } catch {
-            console.log("Bulk deletion failed");
+        } catch (error) {
+            console.error("Bulk deletion failed", error);
+            if (error.response && error.response.data && error.response.data.message) {
+                setErrorMessage(error.response.data.message);
+            } else {
+                setErrorMessage('Failed to delete users within the date range.');
+            }
+            setSuccessMessage('');
         }
     }
 
     async function updateUser() {
         try {
             console.log(`Sending request to update user with ID: ${editingUser.id}`);
-            const res = await axios.put(`${url}/${editingUser.id}`, editingUser);
+            const res = await axios.put(`${url}/${editingUser.id}`, {
+                username: editingUser.username,
+                email: editingUser.email,
+            });
+
             if (res.status === 200) {
                 setRun((prev) => prev + 1);
-                setEditingUser(null); // إغلاق المودال بعد التحديث
+                setSuccessMessage('User updated successfully.');
+                setErrorMessage('');
+                setEditingUser(null);
             }
-        } catch {
-            console.log("Update failed");
+        } catch (error) {
+            console.error("Update failed", error);
+            if (error.response && error.response.data && error.response.data.message) {
+                setErrorMessage(error.response.data.message);
+            } else {
+                setErrorMessage('Failed to update user.');
+            }
+            setSuccessMessage('');
         }
     }
 
     const handleSearch = (e) => {
-        setusername(e.target.value);
+        setUsername(e.target.value);
     };
 
-    const handleregisterDate= (e) => {
-        setregisterDate(e.target.value);
+    const handleRegisterDate = (e) => {
+        setRegisterDate(e.target.value);
     };
 
     const handleStartDate = (e) => {
@@ -99,9 +129,7 @@ export default function Home() {
                 response = await axios.get(`${url}/${registerDate}`);
             } else if (startDate && endDate) {
                 response = await axios.get(`${url}/registered-between?startDate=${startDate}&endDate=${endDate}`);
-                console.log(`Searching users between dates ${response}`);
-
-                // http://localhost:8080/users/registered-between?startDate=01-01-2024&endDate=01-28-2024
+                console.log(`Searching users between dates ${startDate} and ${endDate}`);
             } else {
                 console.log("Fetching all users");
                 response = await axios.get(url);
@@ -109,7 +137,8 @@ export default function Home() {
 
             setData(response.data);
         } catch (error) {
-            console.log("Search failed", error);
+            console.error("Search failed", error);
+            setErrorMessage('Search failed.');
         } finally {
             setLoading(false);
         }
@@ -117,25 +146,11 @@ export default function Home() {
 
     const openEditModal = (user) => {
         setEditingUser(user);
+        setSuccessMessage('');
+        setErrorMessage('');
     };
 
-    
-    let filteredData = data;
-    if (username) {
-        filteredData = data.filter(users => {
-            const formattedDate = users.registerDate?.split('T')[0]; // التأكد من تنسيق التاريخ ليكون YYYY-MM-DD فقط
-            if (username) {
-                return users.username?.toLowerCase().includes(username.toLowerCase());
-            } else if (username) {
-                return formattedDate === username;
-            } else if (startDate && endDate) {
-                return formattedDate >= startDate && formattedDate <= endDate;
-            }
-            return true;
-        });
-    }
-
-    if (loading) return <LinearProgress />
+    if (loading) return <LinearProgress />;
 
     const columns = [
         {
@@ -150,7 +165,7 @@ export default function Home() {
         },
         {
             name: 'Registration Date',
-            selector: row => row.registerDate?.split('T')[0] || 'No Date Available', // عرض التاريخ بصيغة YYYY-MM-DD فقط
+            selector: row => row.registerDate?.split('T')[0] || 'No Date Available',
             sortable: true,
         },
         {
@@ -163,8 +178,7 @@ export default function Home() {
             ),
         },
     ];
-    
-    
+
     return (
         <div className="search-table-container">
             <h1>Search Page</h1>
@@ -181,7 +195,7 @@ export default function Home() {
                         type="date"
                         placeholder="Search by date..."
                         value={registerDate}
-                        onChange={handleregisterDate}
+                        onChange={handleRegisterDate}
                         className="form-input"
                     />
                     <button className='btn' type="submit">Search</button>
@@ -228,7 +242,7 @@ export default function Home() {
                             bgcolor: 'background.paper',
                             boxShadow: 24,
                             p: 4,
-                            borderRadius: 2,  // تنسيق لتدوير حواف المودال
+                            borderRadius: 2,
                         }}
                     >
                         <h2>Edit User</h2>
@@ -248,13 +262,14 @@ export default function Home() {
                             onChange={(e) => setEditingUser({ ...editingUser, email: e.target.value })}
                             sx={{ mb: 2 }}
                         />
-                   
                         <Button variant="contained" onClick={updateUser} color="primary">
                             Save
                         </Button>
                         <Button variant="outlined" onClick={() => setEditingUser(null)} color="secondary" sx={{ ml: 1 }}>
                             Cancel
                         </Button>
+                        {successMessage && <Alert severity="success">{successMessage}</Alert>}
+                        {errorMessage && <Alert severity="error">{errorMessage}</Alert>}
                     </Box>
                 </Modal>
             )}
