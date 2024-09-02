@@ -13,9 +13,6 @@ export default function Navbar(){
             <Link to="/home" className="site-title">
                 Home
             </Link>
-            <Link to="/hometest" className="site-title">
-                Hometest
-            </Link>
             <ul>
                 <li><Link to="/" onClick={handleLogout} >logout</Link></li>
             </ul>

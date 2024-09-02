@@ -5,7 +5,6 @@ import SignUp from './Pages/SignUp';
 import Login from './Pages/Login';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import ProtectedRoute from './Components/ProtectedRoute';
-import Hometest from './Pages/Hometest';
 
 function App() {
   return (
@@ -15,7 +14,6 @@ function App() {
         <Routes>
           <Route path='/' element={<Login />} />
           <Route path='/sign-up' element={<SignUp />} />
-          <Route path='/hometest' element={<Hometest/>} />
 
           <Route
             path='/home'
