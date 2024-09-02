@@ -7,7 +7,7 @@ body{
 }
 
 .nav{
-  background-color: #333;
+  background-color: #283975;
   color: white;
   display: flex;
   justify-content: space-between;
@@ -37,7 +37,7 @@ body{
   padding: .25rem;
 }
 .nav li:hover{
-  background-color: #777;
+  background-color: #0f2062;
 }
 
 /*---------------------------------------------------------------*/.search-table-container {

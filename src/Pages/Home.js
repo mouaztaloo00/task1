@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from "axios";
 import DataTable from 'react-data-table-component';
-import { Modal, Box, TextField, Button } from '@mui/material';
+import { Modal, Box, TextField, Button , LinearProgress} from '@mui/material';
 
 export default function Home() {
     const [data, setData] = useState([]);
@@ -89,7 +89,7 @@ export default function Home() {
         });
     }
 
-    if (loading) return <p>Loading...</p>;
+    if (loading) return <LinearProgress />
 
     const columns = [
         {

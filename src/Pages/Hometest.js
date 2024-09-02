@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from "axios";
 import DataTable from 'react-data-table-component';
-import { Modal, Box, TextField, Button } from '@mui/material';
+import { Modal, Box, TextField, Button , LinearProgress} from '@mui/material';
 
 export default function Hometest() {
     const [data, setData] = useState([]);
@@ -119,7 +119,26 @@ export default function Hometest() {
         setEditingUser(user);
     };
 
+<<<<<<< HEAD
     if (loading) return <p>Loading...</p>;
+=======
+    let filteredData = data;
+    if (search) {
+        filteredData = data.filter(users => {
+            const formattedDate = users.registerDate?.split('T')[0]; // التأكد من تنسيق التاريخ ليكون YYYY-MM-DD فقط
+            if (searchTerm) {
+                return users.username?.toLowerCase().includes(searchTerm.toLowerCase());
+            } else if (searchDate) {
+                return formattedDate === searchDate;
+            } else if (startDate && endDate) {
+                return formattedDate >= startDate && formattedDate <= endDate;
+            }
+            return true;
+        });
+    }
+
+    if (loading) return <LinearProgress />
+>>>>>>> 4523fc5990ac618c47a08fa90c6d4b669ff4d971
 
     const columns = [
         {

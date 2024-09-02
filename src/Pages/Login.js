@@ -8,42 +8,55 @@ import {
   CssBaseline,
   Box,
   Grid,
+  Alert,
+  CircularProgress,
 } from "@mui/material";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from "react-router-dom";
+import HttpsRoundedIcon from "@mui/icons-material/HttpsRounded";
+import AlternateEmailRoundedIcon from "@mui/icons-material/AlternateEmailRounded";
+import LoginRoundedIcon from "@mui/icons-material/LoginRounded";
 import axios from "axios";
 
 const Login = () => {
-
   const url = `${process.env.REACT_APP_API_BASE_URL}/users/login`;
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const history = useNavigate();
+  const [success, setSuccess] = useState("");
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   const handleSubmit = async (event) => {
     event.preventDefault();
     setError("");
+    setSuccess("");
+    setLoading(true);
 
-    // Basic validation
     if (!email || !password) {
       setError("Email and Password are required");
+      setLoading(false);
       return;
     }
 
     try {
-      const response = await axios.get(url,{
-        params: { email, password }
+      const response = await axios.post(url, {
+        email,
+        password,
       });
 
-      if (response.data.length > 0) {
-        localStorage.setItem('authToken', response.data.token);
-        history("/Home");
+      if (response.data.message === "Login Successful") {
+        localStorage.setItem('authToken', response.data.token || ''); 
+        setSuccess("Login successful!");
+        setTimeout(() => navigate("/Home"), 2000); 
       } else {
-        setError("Invalid Email or Password");
+        setError(response.data.message || "Invalid Email or Password");
       }
     } catch (error) {
-      setError("Error occurred while logging in");
+      const errorMessage = error.response?.data?.message || "Error occurred while logging in";
+      setError(errorMessage);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -58,41 +71,53 @@ const Login = () => {
           alignItems: "center",
         }}
       >
-        <Avatar sx={{ m: 1, bgcolor: "secondary.main" }}>
-          <LockOutlinedIcon />
+        <Avatar sx={{ m: 1.4, bgcolor: "secondary.main", width: 56, height: 56 }}>
+          <LockOutlinedIcon sx={{ fontSize: 32 }} />
         </Avatar>
         <Typography component="h1" variant="h5">
           Login
         </Typography>
-        {error && <Typography color="error">{error}</Typography>}
         <form onSubmit={handleSubmit} style={{ width: "100%", marginTop: 1 }}>
-          <TextField
-            margin="normal"
-            autoComplete="off"
-            required
+          <Box sx={{ display: 'flex', alignItems: 'flex-end' }}>
+            <AlternateEmailRoundedIcon sx={{ color: 'action.active', fontSize: 40, m: 1, my: 2 }} />
+            <TextField
+              margin="normal"
+              autoComplete="off"
+              required
+              fullWidth
+              label="Email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              autoFocus
+            />
+          </Box>
+          <Box sx={{ display: 'flex', alignItems: 'flex-end' }}>
+            <HttpsRoundedIcon sx={{ color: 'action.active', mr: 1, fontSize: 40, m: 1, my: 2 }} />
+            <TextField
+              margin="normal"
+              autoComplete="off"
+              required
+              fullWidth
+              label="Password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+          </Box>
+          <Button
+            type="submit"
+            endIcon={<LoginRoundedIcon />}
             fullWidth
-            label="Email Address"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            autoFocus
-          />
-          <TextField
-            margin="normal"
-            required
-            fullWidth
-            label="Password"
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            autoComplete="current-password"
-          />
-          <Button type="submit" fullWidth variant="contained" sx={{ mt: 3, mb: 2 }}>
+            variant="contained"
+            sx={{ mt: 3, mb: 2 }}
+          >
             Login
           </Button>
           <Grid container>
             <Grid item>
               <Button
-                onClick={() => history("/")}
+                onClick={() => navigate("/sign-up")}
                 variant="text"
                 color="primary"
               >
@@ -101,6 +126,20 @@ const Login = () => {
             </Grid>
           </Grid>
         </form>
+
+        {error && (
+          <Alert severity="error" sx={{ width: "100%", mt: 2 }}>
+            {error}
+          </Alert>
+        )}
+        {success && (
+          <Alert severity="success" sx={{ width: "100%", mt: 2 }}>
+            {success}
+          </Alert>
+        )}
+        {loading && (
+          <CircularProgress sx={{ mt: 2 }} />
+        )}
       </Box>
     </Container>
   );
