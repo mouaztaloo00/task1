@@ -10,6 +10,13 @@ import {
   Alert,
 } from "@mui/material";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
+import AccountCircle from '@mui/icons-material/AccountCircle';
+import AlternateEmailRoundedIcon from '@mui/icons-material/AlternateEmailRounded';
+import HttpsRoundedIcon from '@mui/icons-material/HttpsRounded';
+import LockResetRoundedIcon from '@mui/icons-material/LockResetRounded';
+import VpnKeyRoundedIcon from '@mui/icons-material/VpnKeyRounded';
+
+
 import axios from "axios";
 import { useNavigate } from 'react-router-dom';
 
@@ -94,60 +101,74 @@ const url = `${process.env.REACT_APP_API_BASE_URL}/users/signup`;
           Sign Up
         </Typography>
         <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1 }}>
-          <TextField
-            margin="normal"
-            autoComplete="off"
-            required
-            fullWidth
-            label="Username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            autoFocus
-          />
-          <TextField
-            margin="normal"
-            autoComplete="off"
-            required
-            fullWidth
-            label="Email"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-          <TextField
-            margin="normal"
-            autoComplete="off"
-            required
-            fullWidth
-            label="Password"
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-          <TextField
-            margin="normal"
-            autoComplete="off"
-            required
-            fullWidth
-            label="Confirm Password"
-            type="password"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-          />
+           <Box sx={{ display: 'flex', alignItems: 'flex-end' }}>
+              <AccountCircle sx={{ color: 'action.active', fontSize: 40 , m: 1, my: 2 }} />
+                <TextField
+                  margin="normal"
+                  autoComplete="off"
+                  required
+                  fullWidth
+                  label="Username"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  autoFocus
+                />
+           </Box>
+            <Box sx={{ display: 'flex', alignItems: 'flex-end' }}>
+              <AlternateEmailRoundedIcon sx={{ color: 'action.active', fontSize: 40, m: 1, my: 2 }} />
+                <TextField
+                    margin="normal"
+                    autoComplete="off"
+                    required
+                    fullWidth
+                    label="Email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                  />
+              </Box>
+                <Box sx={{ display: 'flex', alignItems: 'flex-end' }}>
+                  <HttpsRoundedIcon sx={{ color: 'action.active', mr: 1, fontSize: 40 , m: 1, my: 2 }} />
+                    <TextField
+                        margin="normal"
+                        autoComplete="off"
+                        required
+                        fullWidth
+                        label="Password"
+                        type="password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                      />
+                </Box>
+                <Box sx={{ display: 'flex', alignItems: 'flex-end' }}>
+                  <LockResetRoundedIcon sx={{ color: 'action.active', mr: 1, fontSize: 40 , m: 1, my: 2 }} />
+                    <TextField
+                        margin="normal"
+                        autoComplete="off"
+                        required
+                        fullWidth
+                        label="Confirm Password"
+                        type="password"
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                      />
+                </Box>
+          
           <Button
             type="submit"
             fullWidth
+            endIcon={<VpnKeyRoundedIcon />}
             variant="contained"
             sx={{ mt: 3, mb: 2 }}
           >
             Sign Up
           </Button>
           <Button
-            onClick={() => history("/login")}
+            onClick={() => history("/")}
             variant="text"
             color="primary"
           >
-            I have an account go to Login
+           i already have an account
           </Button>
         </Box>
       </Box>

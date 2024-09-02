@@ -13,8 +13,8 @@ function App() {
       <Navbar />
       <div className='container'>
         <Routes>
-          <Route path='/login' element={<Login />} />
-          <Route path='/' element={<SignUp />} />
+          <Route path='/' element={<Login />} />
+          <Route path='/sign-up' element={<SignUp />} />
           <Route path='/hometest' element={<Hometest/>} />
 
           <Route
