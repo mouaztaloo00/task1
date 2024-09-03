@@ -1,6 +1,7 @@
 import React from 'react';
 import Navbar from './Components/Navbar';
 import Home from './Pages/Home';
+import HomeTest from './Pages/HomeTest';
 import SignUp from './Pages/SignUp';
 import Login from './Pages/Login';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
@@ -12,9 +13,9 @@ function App() {
       <Navbar />
       <div className='container'>
         <Routes>
-          <Route path='/' element={<Login />} />
-          <Route path='/sign-up' element={<SignUp />} />
-
+          <Route path='/' element={<Login/>}/>
+          <Route path='/sign-up' element={<SignUp/>}/>
+          <Route path='/homeTest' element={<HomeTest/>} />
           <Route
             path='/home'
             element={

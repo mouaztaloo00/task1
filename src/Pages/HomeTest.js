@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import axios from "axios";
-import DataTable from 'react-data-table-component';
-import { Modal, Box, TextField, Button, LinearProgress, Snackbar, IconButton,Typography } from '@mui/material';
+import {
+    Modal, Box, TextField, Button, LinearProgress, Snackbar,
+    IconButton, Card, CardContent, CardActions, Typography, Pagination
+} from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 
 export default function Home() {
@@ -15,7 +17,9 @@ export default function Home() {
     const [editingUser, setEditingUser] = useState(null);
     const [snackbarMessage, setSnackbarMessage] = useState({ text: '', type: '' });
     const [snackbarOpen, setSnackbarOpen] = useState(false);
-    const [deleteUserId, setDeleteUserId] = useState(null); 
+    const [deleteUserId, setDeleteUserId] = useState(null);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [itemsPerPage] = useState(10);
 
     const url = `${process.env.REACT_APP_API_BASE_URL}/users`;
 
@@ -32,11 +36,9 @@ export default function Home() {
     const fetchData = async () => {
         setLoading(true);
         try {
-            console.log("Fetching data from API...");
             const response = await axios.get(url);
             setData(response.data);
         } catch (error) {
-            console.error("Error fetching data", error);
             showSnackbar('Failed to fetch data.', 'error');
         } finally {
             setLoading(false);
@@ -49,49 +51,36 @@ export default function Home() {
 
     const confirmDeleteUser = async () => {
         try {
-            console.log(`Sending request to delete user with ID: ${deleteUserId}`);
             const res = await axios.delete(`${url}/${deleteUserId}`);
             if (res.status === 200) {
                 setRun((prev) => prev + 1);
                 showSnackbar('User deleted successfully.', 'success');
             }
         } catch (error) {
-            console.error("Deletion failed", error);
-            if (error.response && error.response.data && error.response.data.message) {
-                showSnackbar(error.response.data.message, 'error');
-            } else {
-                showSnackbar('Failed to delete user.', 'error');
-            }
+            showSnackbar('Failed to delete user.', 'error');
         } finally {
-            setDeleteUserId(null); 
+            setDeleteUserId(null);
         }
     };
 
     const cancelDeleteUser = () => {
-        setDeleteUserId(null); 
+        setDeleteUserId(null);
     };
 
     async function deleteUsersByDateRange() {
         try {
-            console.log(`Sending request to delete users from ${startDate} to ${endDate}`);
             const res = await axios.delete(`${url}/registered-between?startDate=${startDate}&endDate=${endDate}`);
             if (res.status === 200) {
                 setRun((prev) => prev + 1);
                 showSnackbar('Users deleted successfully within the date range.', 'success');
             }
         } catch (error) {
-            console.error("Bulk deletion failed", error);
-            if (error.response && error.response.data && error.response.data.message) {
-                showSnackbar(error.response.data.message, 'error');
-            } else {
-                showSnackbar('Failed to delete users within the date range.', 'error');
-            }
+            showSnackbar('Failed to delete users within the date range.', 'error');
         }
     }
 
     async function updateUser() {
         try {
-            console.log(`Sending request to update user with ID: ${editingUser.id}`);
             const res = await axios.put(`${url}/${editingUser.id}`, {
                 username: editingUser.username,
                 email: editingUser.email,
@@ -103,12 +92,7 @@ export default function Home() {
                 setEditingUser(null);
             }
         } catch (error) {
-            console.error("Update failed", error);
-            if (error.response && error.response.data && error.response.data.message) {
-                showSnackbar(error.response.data.message, 'error');
-            } else {
-                showSnackbar('Failed to update user.', 'error');
-            }
+            showSnackbar('Failed to update user.', 'error');
         }
     }
 
@@ -135,16 +119,12 @@ export default function Home() {
             let response;
 
             if (username) {
-                console.log(`Searching users by username: ${username}`);
                 response = await axios.get(`${url}/username/${username}`);
             } else if (registerDate) {
-                console.log(`Searching users by registration date: ${registerDate}`);
                 response = await axios.get(`${url}/${registerDate}`);
             } else if (startDate && endDate) {
                 response = await axios.get(`${url}/registered-between?startDate=${startDate}&endDate=${endDate}`);
-                console.log(`Searching users between dates ${startDate} and ${endDate}`);
             } else {
-                console.log("Fetching all users");
                 response = await axios.get(url);
             }
 
@@ -155,12 +135,7 @@ export default function Home() {
                 showSnackbar('Search completed successfully.', 'success');
             }
         } catch (error) {
-            console.error("Search failed", error);
-            if (error.response && error.response.data && error.response.data.message) {
-                showSnackbar(error.response.data.message, 'error');
-            } else {
-                showSnackbar('Search failed.', 'error');
-            }
+            showSnackbar('Search failed.', 'error');
         } finally {
             setLoading(false);
         }
@@ -168,41 +143,22 @@ export default function Home() {
 
     const openEditModal = (user) => {
         setEditingUser(user);
-        setSnackbarMessage({ text: '', type: '' });
+    };
+
+    const indexOfLastItem = currentPage * itemsPerPage;
+    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+    const currentItems = data.slice(indexOfFirstItem, indexOfLastItem);
+
+    const handlePageChange = (event, value) => {
+        setCurrentPage(value);
     };
 
     if (loading) return <LinearProgress />;
 
-    const columns = [
-        {
-            name: 'Username',
-            selector: row => row.username || 'No Name Available',
-            sortable: true,
-        },
-        {
-            name: 'Email',
-            selector: row => row.email || 'No Email Available',
-            sortable: true,
-        },
-        {
-            name: 'Registration Date',
-            selector: row => row.registerDate?.split('T')[0] || 'No Date Available',
-            sortable: true,
-        },
-        {
-            name: 'Action',
-            cell: row => (
-                <div className='buttonrow'>
-                    <Button variant="contained" type="submit" color="primary" onClick={() => openEditModal(row)} sx={{margin:'5px'}}>Edit</Button>
-                    <Button variant="outlined" color="error" onClick={() => handleDeleteUser(row.id)} sx={{margin:'5px'}}>Delete</Button>
-                </div>
-            ),
-        },
-    ];
-
     return (
         <div className="search-table-container">
             <Typography variant="h4" gutterBottom>Administrator</Typography>
+
             <div className="search-container">
             <Box sx={{ display: 'flex', gap: 2, mb: 4 }}>
                 <Box component="form" onSubmit={handleSearchSubmit} sx={{ display: 'flex', flexDirection: 'column', gap: 2, flex: 1 }}>
@@ -256,17 +212,36 @@ export default function Home() {
                 </Box>
             </Box>
         </div>
-                <DataTable
-                    columns={columns}
-                    data={data}
-                    pagination
-                    highlightOnHover
-                />
 
-            <Modal
-                open={Boolean(deleteUserId)}
-                onClose={cancelDeleteUser}
-            >
+            <Pagination
+                count={Math.ceil(data.length / itemsPerPage)}
+                page={currentPage}
+                onChange={handlePageChange}
+                color="primary"
+                sx={{ margin: '20px 0', display: 'flex', justifyContent: 'center' }}
+            />
+
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px', justifyContent: 'center' }}>
+                {currentItems.map((user) => (
+                    <Card key={user.id} sx={{ maxWidth: 345 }}>
+                        <CardContent>
+                            <Typography variant="h6">{user.username || 'No Name Available'}</Typography>
+                            <Typography variant="body2" color="text.secondary">
+                                {user.email || 'No Email Available'}
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary">
+                                Registered: {user.registerDate?.split('T')[0] || 'No Date Available'}
+                            </Typography>
+                        </CardContent>
+                        <CardActions>
+                            <Button size="small" onClick={() => openEditModal(user)}>Edit</Button>
+                            <Button size="small" color="error" onClick={() => handleDeleteUser(user.id)}>Delete</Button>
+                        </CardActions>
+                    </Card>
+                ))}
+            </div>
+
+            <Modal open={Boolean(deleteUserId)} onClose={cancelDeleteUser}>
                 <Box 
                     sx={{
                         position: 'absolute',
@@ -281,22 +256,21 @@ export default function Home() {
                         textAlign: 'center'
                     }}
                 >
-                    <h2>Confirm Deletion</h2>
-                    <p>Are you sure you want to delete this user?</p>
-                    <Button variant="contained" onClick={confirmDeleteUser} color="error" sx={{ mr: 2 }}>
-                        Delete
-                    </Button>
-                    <Button variant="outlined" onClick={cancelDeleteUser}>
-                        Cancel
-                    </Button>
+                    <Typography variant="h6">Confirm Deletion</Typography>
+                    <Typography variant="body1">Are you sure you want to delete this user?</Typography>
+                    <Box sx={{ mt: 2 }}>
+                        <Button variant="contained" onClick={confirmDeleteUser} color="error" sx={{ mr: 1 }}>
+                            Delete
+                        </Button>
+                        <Button variant="outlined" onClick={cancelDeleteUser}>
+                            Cancel
+                        </Button>
+                    </Box>
                 </Box>
             </Modal>
 
             {editingUser && (
-                <Modal
-                    open={Boolean(editingUser)}
-                    onClose={() => setEditingUser(null)}
-                >
+                <Modal open={Boolean(editingUser)} onClose={() => setEditingUser(null)}>
                     <Box 
                         sx={{
                             position: 'absolute',
@@ -310,7 +284,7 @@ export default function Home() {
                             borderRadius: 2,
                         }}
                     >
-                        <h2>Edit User</h2>
+                        <Typography variant="h6">Edit User</Typography>
                         <TextField
                             label="Username"
                             variant="outlined"
@@ -327,12 +301,10 @@ export default function Home() {
                             onChange={(e) => setEditingUser({ ...editingUser, email: e.target.value })}
                             sx={{ mb: 2 }}
                         />
-                        <Button variant="contained" onClick={updateUser} color="primary">
-                            Save
-                        </Button>
-                        <Button variant="outlined" onClick={() => setEditingUser(null)} color="secondary" sx={{ ml: 1 }}>
-                            Cancel
-                        </Button>
+                        <Box sx={{ display: 'flex', gap: 1 }}>
+                            <Button variant="contained" onClick={updateUser} color="primary">Save</Button>
+                            <Button variant="outlined" onClick={() => setEditingUser(null)} color="secondary">Cancel</Button>
+                        </Box>
                     </Box>
                 </Modal>
             )}
@@ -347,8 +319,8 @@ export default function Home() {
                     </IconButton>
                 }
             >
-                <div
-                    style={{
+                <Box
+                    sx={{
                         backgroundColor: snackbarMessage.type === 'success' ? 'green' : 'red',
                         color: 'white',
                         padding: '8px 16px',
@@ -356,7 +328,7 @@ export default function Home() {
                     }}
                 >
                     {snackbarMessage.text}
-                </div>
+                </Box>
             </Snackbar>
         </div>
     );
