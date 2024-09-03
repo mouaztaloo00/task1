@@ -8,6 +8,7 @@ import {
   CssBaseline,
   Box,
   Grid,
+  Snackbar,
   Alert,
   CircularProgress,
 } from "@mui/material";
@@ -25,6 +26,7 @@ const Login = () => {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
+  const [openSnackbar, setOpenSnackbar] = useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = async (event) => {
@@ -32,32 +34,40 @@ const Login = () => {
     setError("");
     setSuccess("");
     setLoading(true);
+    setOpenSnackbar(false);
 
     if (!email || !password) {
       setError("Email and Password are required");
+      setOpenSnackbar(true);
       setLoading(false);
       return;
     }
 
     try {
-      const response = await axios.post(url, {
-        email,
-        password,
-      });
+      const response = await axios.post(url, { email, password });
 
       if (response.data.message === "Login Successful") {
         localStorage.setItem('authToken', response.data.token || ''); 
         setSuccess("Login successful!");
+        setOpenSnackbar(true);
         setTimeout(() => navigate("/Home"), 2000); 
       } else {
         setError(response.data.message || "Invalid Email or Password");
+        setOpenSnackbar(true);
       }
     } catch (error) {
       const errorMessage = error.response?.data?.message || "Error occurred while logging in";
       setError(errorMessage);
+      setOpenSnackbar(true);
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleCloseSnackbar = () => {
+    setOpenSnackbar(false);
+    setError(""); 
+    setSuccess("");
   };
 
   return (
@@ -127,16 +137,19 @@ const Login = () => {
           </Grid>
         </form>
 
-        {error && (
-          <Alert severity="error" sx={{ width: "100%", mt: 2 }}>
-            {error}
+        <Snackbar
+          open={openSnackbar}
+          autoHideDuration={6000}
+          onClose={handleCloseSnackbar}
+        >
+          <Alert
+            onClose={handleCloseSnackbar}
+            severity={success ? "success" : error ? "error" : "info"}
+            sx={{ width: '100%' , borderRadius :'20px'}}
+          >
+            {success || error}
           </Alert>
-        )}
-        {success && (
-          <Alert severity="success" sx={{ width: "100%", mt: 2 }}>
-            {success}
-          </Alert>
-        )}
+        </Snackbar>
         {loading && (
           <CircularProgress sx={{ mt: 2 }} />
         )}

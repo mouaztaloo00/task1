@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import axios from "axios";
 import DataTable from 'react-data-table-component';
-import { Modal, Box, TextField, Button, LinearProgress, Alert } from '@mui/material';
+import { Modal, Box, TextField, Button, LinearProgress, Snackbar, IconButton } from '@mui/material';
+import CloseIcon from '@mui/icons-material/Close';
 
 export default function Home() {
     const [data, setData] = useState([]);
@@ -12,13 +13,20 @@ export default function Home() {
     const [startDate, setStartDate] = useState('');
     const [endDate, setEndDate] = useState('');
     const [editingUser, setEditingUser] = useState(null);
-    const [successMessage, setSuccessMessage] = useState('');
-    const [errorMessage, setErrorMessage] = useState('');
+    const [snackbarMessage, setSnackbarMessage] = useState({ text: '', type: '' }); // {text: '', type: 'success' | 'error'}
+    const [snackbarOpen, setSnackbarOpen] = useState(false);
+
     const url = `${process.env.REACT_APP_API_BASE_URL}/users`;
 
     useEffect(() => {
         fetchData();
     }, [runUseEffect]);
+
+    const showSnackbar = (text, type) => {
+        setSnackbarMessage({ text, type });
+        setSnackbarOpen(true);
+        setTimeout(() => setSnackbarOpen(false), 3000); // Hide message after 3 seconds
+    };
 
     const fetchData = async () => {
         setLoading(true);
@@ -26,9 +34,10 @@ export default function Home() {
             console.log("Fetching data from API...");
             const response = await axios.get(url);
             setData(response.data);
+            showSnackbar('Data fetched successfully.', 'success');
         } catch (error) {
             console.error("Error fetching data", error);
-            setErrorMessage('Failed to fetch data.');
+            showSnackbar('Failed to fetch data.', 'error');
         } finally {
             setLoading(false);
         }
@@ -40,17 +49,15 @@ export default function Home() {
             const res = await axios.delete(`${url}/${id}`);
             if (res.status === 200) {
                 setRun((prev) => prev + 1);
-                setSuccessMessage('User deleted successfully.');
-                setErrorMessage('');
+                showSnackbar('User deleted successfully.', 'success');
             }
         } catch (error) {
             console.error("Deletion failed", error);
             if (error.response && error.response.data && error.response.data.message) {
-                setErrorMessage(error.response.data.message);
+                showSnackbar(error.response.data.message, 'error');
             } else {
-                setErrorMessage('Failed to delete user.');
+                showSnackbar('Failed to delete user.', 'error');
             }
-            setSuccessMessage('');
         }
     }
 
@@ -60,17 +67,15 @@ export default function Home() {
             const res = await axios.delete(`${url}/registered-between?startDate=${startDate}&endDate=${endDate}`);
             if (res.status === 200) {
                 setRun((prev) => prev + 1);
-                setSuccessMessage('Users deleted successfully within the date range.');
-                setErrorMessage('');
+                showSnackbar('Users deleted successfully within the date range.', 'success');
             }
         } catch (error) {
             console.error("Bulk deletion failed", error);
             if (error.response && error.response.data && error.response.data.message) {
-                setErrorMessage(error.response.data.message);
+                showSnackbar(error.response.data.message, 'error');
             } else {
-                setErrorMessage('Failed to delete users within the date range.');
+                showSnackbar('Failed to delete users within the date range.', 'error');
             }
-            setSuccessMessage('');
         }
     }
 
@@ -84,18 +89,16 @@ export default function Home() {
 
             if (res.status === 200) {
                 setRun((prev) => prev + 1);
-                setSuccessMessage('User updated successfully.');
-                setErrorMessage('');
+                showSnackbar('User updated successfully.', 'success');
                 setEditingUser(null);
             }
         } catch (error) {
             console.error("Update failed", error);
             if (error.response && error.response.data && error.response.data.message) {
-                setErrorMessage(error.response.data.message);
+                showSnackbar(error.response.data.message, 'error');
             } else {
-                setErrorMessage('Failed to update user.');
+                showSnackbar('Failed to update user.', 'error');
             }
-            setSuccessMessage('');
         }
     }
 
@@ -135,10 +138,19 @@ export default function Home() {
                 response = await axios.get(url);
             }
 
-            setData(response.data);
+            if (response.data.length === 0) {
+                showSnackbar('No users found.', 'error');
+            } else {
+                setData(response.data);
+                showSnackbar('Search completed successfully.', 'success');
+            }
         } catch (error) {
             console.error("Search failed", error);
-            setErrorMessage('Search failed.');
+            if (error.response && error.response.data && error.response.data.message) {
+                showSnackbar(error.response.data.message, 'error');
+            } else {
+                showSnackbar('Search failed.', 'error');
+            }
         } finally {
             setLoading(false);
         }
@@ -146,8 +158,7 @@ export default function Home() {
 
     const openEditModal = (user) => {
         setEditingUser(user);
-        setSuccessMessage('');
-        setErrorMessage('');
+        setSnackbarMessage({ text: '', type: '' }); // Clear snackbar messages
     };
 
     if (loading) return <LinearProgress />;
@@ -181,7 +192,7 @@ export default function Home() {
 
     return (
         <div className="search-table-container">
-            <h1>Search Page</h1>
+            <h1>Administrator</h1>
             <div className="search-container">
                 <form className='form-home' onSubmit={handleSearchSubmit}>
                     <input
@@ -270,11 +281,31 @@ export default function Home() {
                         <Button variant="outlined" onClick={() => setEditingUser(null)} color="secondary" sx={{ ml: 1 }}>
                             Cancel
                         </Button>
-                        {successMessage && <Alert severity="success">{successMessage}</Alert>}
-                        {errorMessage && <Alert severity="error">{errorMessage}</Alert>}
                     </Box>
                 </Modal>
             )}
+
+            <Snackbar
+                open={snackbarOpen}
+                autoHideDuration={3000}
+                onClose={() => setSnackbarOpen(false)}
+                action={
+                    <IconButton size="small" aria-label="close" color="inherit" onClick={() => setSnackbarOpen(false)}>
+                        <CloseIcon fontSize="small" />
+                    </IconButton>
+                }
+            >
+                <div
+                    style={{
+                        backgroundColor: snackbarMessage.type === 'success' ? 'green' : 'red',
+                        color: 'white',
+                        padding: '8px 16px',
+                        borderRadius: '20px',
+                    }}
+                >
+                    {snackbarMessage.text}
+                </div>
+            </Snackbar>
         </div>
     );
 }

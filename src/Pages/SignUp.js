@@ -172,12 +172,11 @@ const SignUp = () => {
         open={openSnackbar}
         autoHideDuration={6000}
         onClose={handleCloseSnackbar}
-        message={successMessage || error}
       >
         <Alert
           onClose={handleCloseSnackbar}
           severity={successMessage ? "success" : error ? "error" : "info"}
-          sx={{ width: '100%' }}
+          sx={{ width: '100%' , borderRadius :'20px' }}
         >
           {successMessage || error}
         </Alert>
