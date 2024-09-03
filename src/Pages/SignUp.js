@@ -61,7 +61,7 @@ const SignUp = () => {
         setSuccessMessage(response.data.message || "Registration successful!");
         setError(""); // Ensure error is cleared
         setOpenSnackbar(true);
-        navigate("/Home");
+        navigate("/home");
       } else {
         setError("Unexpected response from server.");
         setSuccessMessage("");

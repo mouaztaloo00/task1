@@ -50,7 +50,7 @@ const Login = () => {
         localStorage.setItem('authToken', response.data.token || ''); 
         setSuccess("Login successful!");
         setOpenSnackbar(true);
-        setTimeout(() => navigate("/Home"), 2000); 
+        setTimeout(() => navigate("/home"), 2000); 
       } else {
         setError(response.data.message || "Invalid Email or Password");
         setOpenSnackbar(true);
