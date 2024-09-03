@@ -13,8 +13,9 @@ export default function Home() {
     const [startDate, setStartDate] = useState('');
     const [endDate, setEndDate] = useState('');
     const [editingUser, setEditingUser] = useState(null);
-    const [snackbarMessage, setSnackbarMessage] = useState({ text: '', type: '' }); // {text: '', type: 'success' | 'error'}
+    const [snackbarMessage, setSnackbarMessage] = useState({ text: '', type: '' });
     const [snackbarOpen, setSnackbarOpen] = useState(false);
+    const [deleteUserId, setDeleteUserId] = useState(null); // حالة جديدة لإدارة الموديل
 
     const url = `${process.env.REACT_APP_API_BASE_URL}/users`;
 
@@ -25,7 +26,7 @@ export default function Home() {
     const showSnackbar = (text, type) => {
         setSnackbarMessage({ text, type });
         setSnackbarOpen(true);
-        setTimeout(() => setSnackbarOpen(false), 3000); // Hide message after 3 seconds
+        setTimeout(() => setSnackbarOpen(false), 3000);
     };
 
     const fetchData = async () => {
@@ -34,7 +35,6 @@ export default function Home() {
             console.log("Fetching data from API...");
             const response = await axios.get(url);
             setData(response.data);
-            showSnackbar('Data fetched successfully.', 'success');
         } catch (error) {
             console.error("Error fetching data", error);
             showSnackbar('Failed to fetch data.', 'error');
@@ -43,10 +43,14 @@ export default function Home() {
         }
     };
 
-    async function deleteUser(id) {
+    const handleDeleteUser = (id) => {
+        setDeleteUserId(id); // إعداد حالة لعرض الموديل مع معرف المستخدم
+    };
+
+    const confirmDeleteUser = async () => {
         try {
-            console.log(`Sending request to delete user with ID: ${id}`);
-            const res = await axios.delete(`${url}/${id}`);
+            console.log(`Sending request to delete user with ID: ${deleteUserId}`);
+            const res = await axios.delete(`${url}/${deleteUserId}`);
             if (res.status === 200) {
                 setRun((prev) => prev + 1);
                 showSnackbar('User deleted successfully.', 'success');
@@ -58,8 +62,14 @@ export default function Home() {
             } else {
                 showSnackbar('Failed to delete user.', 'error');
             }
+        } finally {
+            setDeleteUserId(null); // إعادة تعيين حالة الموديل
         }
-    }
+    };
+
+    const cancelDeleteUser = () => {
+        setDeleteUserId(null); // إخفاء الموديل بدون حذف
+    };
 
     async function deleteUsersByDateRange() {
         try {
@@ -158,7 +168,7 @@ export default function Home() {
 
     const openEditModal = (user) => {
         setEditingUser(user);
-        setSnackbarMessage({ text: '', type: '' }); // Clear snackbar messages
+        setSnackbarMessage({ text: '', type: '' });
     };
 
     if (loading) return <LinearProgress />;
@@ -184,7 +194,7 @@ export default function Home() {
             cell: row => (
                 <div className='buttonrow'>
                     <button className='btn' onClick={() => openEditModal(row)}>Edit</button>
-                    <button className='btn' onClick={() => deleteUser(row.id)}>Delete</button>
+                    <button className='btn' onClick={() => handleDeleteUser(row.id)}>Delete</button>
                 </div>
             ),
         },
@@ -239,6 +249,36 @@ export default function Home() {
                 pagination
                 highlightOnHover
             />
+
+            {/* موديل تأكيد الحذف */}
+            <Modal
+                open={Boolean(deleteUserId)}
+                onClose={cancelDeleteUser}
+            >
+                <Box 
+                    sx={{
+                        position: 'absolute',
+                        top: '50%',
+                        left: '50%',
+                        transform: 'translate(-50%, -50%)',
+                        width: 300,
+                        bgcolor: 'background.paper',
+                        boxShadow: 24,
+                        p: 4,
+                        borderRadius: 2,
+                        textAlign: 'center'
+                    }}
+                >
+                    <h2>Confirm Deletion</h2>
+                    <p>Are you sure you want to delete this user?</p>
+                    <Button variant="contained" onClick={confirmDeleteUser} color="error" sx={{ mr: 2 }}>
+                        Delete
+                    </Button>
+                    <Button variant="outlined" onClick={cancelDeleteUser}>
+                        Cancel
+                    </Button>
+                </Box>
+            </Modal>
 
             {editingUser && (
                 <Modal
