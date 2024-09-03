@@ -200,6 +200,8 @@ export default function Home() {
                     />
                     <button className='btn' type="submit">Search</button>
                 </form>
+                <br/>
+                <br/>
                 <form className='form-home' onSubmit={handleSearchSubmit}>
                     From <input
                         type="date"
