@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from "axios";
 import DataTable from 'react-data-table-component';
-import { Modal, Box, TextField, Button, LinearProgress, Snackbar, IconButton,Typography } from '@mui/material';
+import { Modal, Box, TextField, Button, LinearProgress, Snackbar, IconButton, Typography } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 
 export default function Home() {
@@ -16,6 +16,7 @@ export default function Home() {
     const [snackbarMessage, setSnackbarMessage] = useState({ text: '', type: '' });
     const [snackbarOpen, setSnackbarOpen] = useState(false);
     const [deleteUserId, setDeleteUserId] = useState(null); 
+    const [deleteByDateRangeOpen, setDeleteByDateRangeOpen] = useState(false);
 
     const url = `${process.env.REACT_APP_API_BASE_URL}/users`;
 
@@ -71,7 +72,11 @@ export default function Home() {
         setDeleteUserId(null); 
     };
 
-    async function deleteUsersByDateRange() {
+    const confirmDeleteByDateRange = () => {
+        setDeleteByDateRangeOpen(true);
+    };
+
+    const handleConfirmDeleteByDateRange = async () => {
         try {
             console.log(`Sending request to delete users from ${startDate} to ${endDate}`);
             const res = await axios.delete(`${url}/registered-between?startDate=${startDate}&endDate=${endDate}`);
@@ -86,8 +91,14 @@ export default function Home() {
             } else {
                 showSnackbar('Failed to delete users within the date range.', 'error');
             }
+        } finally {
+            setDeleteByDateRangeOpen(false);
         }
-    }
+    };
+
+    const handleCancelDeleteByDateRange = () => {
+        setDeleteByDateRangeOpen(false);
+    };
 
     async function updateUser() {
         try {
@@ -204,64 +215,64 @@ export default function Home() {
         <div className="search-table-container">
             <Typography variant="h4" gutterBottom>Administrator</Typography>
             <div className="search-container">
-            <Box sx={{ display: 'flex', gap: 2, mb: 4 }}>
-                <Box component="form" onSubmit={handleSearchSubmit} sx={{ display: 'flex', flexDirection: 'column', gap: 2, flex: 1 }}>
-                    <TextField
-                        label="Search by Username"
-                        variant="outlined"
-                        value={username}
-                        onChange={handleSearch}
-                        fullWidth
-                        sx={{ maxWidth: 400 }}
-                    />
-                    <TextField
-                        label="Search by Registration Date"
-                        type="date"
-                        variant="outlined"
-                        value={registerDate}
-                        onChange={handleRegisterDate}
-                        fullWidth
-                        sx={{ maxWidth: 400 }}
-                        InputLabelProps={{ shrink: true }}
-                    />
-                    <Button sx={{ maxWidth: 400 }} variant="contained" type="submit" color="primary">Search</Button>
-                </Box>
-                <Box component="form" onSubmit={handleSearchSubmit} sx={{ display: 'flex', flexDirection: 'column', gap: 2, flex: 1 }}>
-                    <TextField
-                        label="From"
-                        type="date"
-                        variant="outlined"
-                        value={startDate}
-                        onChange={handleStartDate}
-                        sx={{ maxWidth: 320 }}
-                        InputLabelProps={{ shrink: true }}
-                    />
-                    <TextField
-                        label="To"
-                        type="date"
-                        variant="outlined"
-                        value={endDate}
-                        onChange={handleEndDate}
-                        sx={{ maxWidth: 320 }}
-                        InputLabelProps={{ shrink: true }}
-                    />
-                     <Box sx={{ display: 'flex', gap: 1 }}>
-                        <Button variant="contained" type="submit" color="primary">
-                            Search by Date
-                        </Button>
-                        <Button variant="outlined" color="error" onClick={deleteUsersByDateRange}>
-                            Delete by Date
-                        </Button>
+                <Box sx={{ display: 'flex', gap: 2, mb: 4 }}>
+                    <Box component="form" onSubmit={handleSearchSubmit} sx={{ display: 'flex', flexDirection: 'column', gap: 2, flex: 1 }}>
+                        <TextField
+                            label="Search by Username"
+                            variant="outlined"
+                            value={username}
+                            onChange={handleSearch}
+                            fullWidth
+                            sx={{ maxWidth: 400 }}
+                        />
+                        <TextField
+                            label="Search by Registration Date"
+                            type="date"
+                            variant="outlined"
+                            value={registerDate}
+                            onChange={handleRegisterDate}
+                            fullWidth
+                            sx={{ maxWidth: 400 }}
+                            InputLabelProps={{ shrink: true }}
+                        />
+                        <Button sx={{ maxWidth: 400 }} variant="contained" type="submit" color="primary">Search</Button>
+                    </Box>
+                    <Box component="form" onSubmit={handleSearchSubmit} sx={{ display: 'flex', flexDirection: 'column', gap: 2, flex: 1 }}>
+                        <TextField
+                            label="From"
+                            type="date"
+                            variant="outlined"
+                            value={startDate}
+                            onChange={handleStartDate}
+                            sx={{ maxWidth: 320 }}
+                            InputLabelProps={{ shrink: true }}
+                        />
+                        <TextField
+                            label="To"
+                            type="date"
+                            variant="outlined"
+                            value={endDate}
+                            onChange={handleEndDate}
+                            sx={{ maxWidth: 320 }}
+                            InputLabelProps={{ shrink: true }}
+                        />
+                        <Box sx={{ display: 'flex', gap: 1 }}>
+                            <Button variant="contained" type="submit" color="primary">
+                                Search by Date
+                            </Button>
+                            <Button variant="outlined" color="error" onClick={confirmDeleteByDateRange}>
+                                Delete by Date
+                            </Button>
+                        </Box>
                     </Box>
                 </Box>
-            </Box>
-        </div>
-                <DataTable
-                    columns={columns}
-                    data={data}
-                    pagination
-                    highlightOnHover
-                />
+            </div>
+            <DataTable
+                columns={columns}
+                data={data}
+                pagination
+                highlightOnHover
+            />
 
             <Modal
                 open={Boolean(deleteUserId)}
@@ -287,6 +298,35 @@ export default function Home() {
                         Delete
                     </Button>
                     <Button variant="outlined" onClick={cancelDeleteUser}>
+                        Cancel
+                    </Button>
+                </Box>
+            </Modal>
+
+            <Modal
+                open={deleteByDateRangeOpen}
+                onClose={handleCancelDeleteByDateRange}
+            >
+                <Box 
+                    sx={{
+                        position: 'absolute',
+                        top: '50%',
+                        left: '50%',
+                        transform: 'translate(-50%, -50%)',
+                        width: 300,
+                        bgcolor: 'background.paper',
+                        boxShadow: 24,
+                        p: 4,
+                        borderRadius: 2,
+                        textAlign: 'center'
+                    }}
+                >
+                    <h2>Confirm Bulk Deletion</h2>
+                    <p>Are you sure you want to delete all users registered between {startDate} and {endDate}?</p>
+                    <Button variant="contained" onClick={handleConfirmDeleteByDateRange} color="error" sx={{ mr: 2 }}>
+                        Delete
+                    </Button>
+                    <Button variant="outlined" onClick={handleCancelDeleteByDateRange}>
                         Cancel
                     </Button>
                 </Box>
